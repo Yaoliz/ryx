@@ -121,7 +121,7 @@ app.post('/api/register',(req,res)=>{
 app.get('/api/student',(req,res)=>{
     const query  = url.parse(req.url, true);
     console.log( query )
-    db.query('select * from student', [],function(result,fields){
+    db.query('select * from user where op= 0 ', [],function(result,fields){
     console.log('查询结果：');
     console.log(result);
     res.send({result,status:200})
@@ -131,7 +131,7 @@ app.get('/api/student',(req,res)=>{
 app.get('/api/teacher',(req,res)=>{
     const query  = url.parse(req.url, true);
     console.log( query )
-    db.query('select * from teacher', [],function(result,fields){
+    db.query('select * from user where op = 1', [],function(result,fields){
         console.log('查询结果：');
         console.log(result);
         res.send({result,status:200})
@@ -167,6 +167,19 @@ app.get('/api/all',(req,res)=>{
         res.send({result,status:200})
     })
 })
+
+app.get('/api/test',(req,res)=>{
+    const query  = url.parse(req.url, true);
+    console.log( query )
+    const sql = "select teacher.id,teacher.tname,user.username ,user.name from teacher inner join user on teacher.id = user.username "
+    db.query(sql, [],function(result,fields){
+        console.log('查询结果：');
+        console.log(result);
+        res.send({result,status:200})
+    })
+})
+
+
 //成绩查询接口
 
 //--------------------增加------------------------------
