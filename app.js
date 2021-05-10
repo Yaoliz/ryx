@@ -28,7 +28,6 @@ app.all('*', function(req, res, next) {
     res.header("Content-Type", "application/json;charset=utf-8");
     next();
 });
-
 // post
 // app.use(bodyParser.urlencoded({
 //     extended: false
@@ -82,9 +81,6 @@ app.post('/api/login',(req,res)=>{
 //注册接口
 app.post('/api/register',(req,res)=>{
     console.log(req.body)
-
-
-
         let {
             username,password,op,name
         } = req.body
@@ -167,7 +163,7 @@ app.get('/api/all',(req,res)=>{
         res.send({result,status:200})
     })
 })
-
+//多表联查测试
 app.get('/api/test',(req,res)=>{
     const query  = url.parse(req.url, true);
     console.log( query )
@@ -178,66 +174,111 @@ app.get('/api/test',(req,res)=>{
         res.send({result,status:200})
     })
 })
-
-
 //成绩查询接口
 app.get('/api/score',(req,res)=>{
     const query  = url.parse(req.url, true);
-    console.log( query )
-    const sql = "select user.username,user.name ,scores.sid ,scores.1,scores.2,scores.3  from scores inner join user on scores.sid = user.username "
+    // console.log( req )
+    const sql = "select user.username,user.name ,scores.sid ,scores.java,scores.h5,scores.mysql  from scores inner join user on scores.sid = user.username "
     db.query(sql, [],function(result,fields){
         console.log('查询结果：');
         console.log(result);
         res.send({result,status:200})
     })
 })
+//登陆个人信息
+app.get('/api/mine',(req,res)=>{
+    const query  = url.parse(req.url, true);
+    console.log('------------------')
+    console.log( query )
+    const sql = "select user.name,user.username,user.age,user.class,user.gender from user where username = ? "
+    const params=query.query.username
+    db.query(sql, params,function(result,fields){
+        console.log('查询结果：');
+        console.log(result);
+        res.send({result,status:200})
+    })
+})
 //--------------------增加------------------------------
-
-
-
+// // 增加成绩库
+app.post('/api/addscore',(req,res)=>{
+    console.log(req.body)
+    let {
+        sid,java,h5,mysql
+    } = req.body
+    console.log(req.body)
+    let sql = "SELECT * FROM user WHERE username = ? "
+    db.query(sql, sid, (result) => {
+        if (!result.length) {
+            return res.json({
+                status:-1,
+                msg:'用户名不存在'
+            })
+        }else {
+            // const sid = req.body.username
+                let ssql = "INSERT INTO scores (sid,java,h5,mysql) VALUES(?,?,?,?)"
+                let  addSqlParams =[sid,java,h5,mysql];
+                db.query (ssql,addSqlParams,function (result,fields) {
+                    return res.json({
+                        status: 200,
+                        msg: '添加成功',
+                    })
+                })
+        }
+    })
+})
 //----------修改----------------------
-
-
-
-
+// 修改分数
+app.post('/api/upscore',(req,res)=>{
+    console.log(req.body)
+    let {
+        sid,java,h5,mysql
+    } = req.body
+    console.log(req.body)
+    let sql = "SELECT * FROM user WHERE username = ? "
+    db.query(sql, sid, (result) => {
+        if (!result.length) {
+            return res.json({
+                status:-1,
+                msg:'用户名不存在'
+            })
+        }else {
+            // const sid = req.body.username
+            // let ssql = "INSERT INTO scores (sid,java,h5,mysql) VALUES(?,?,?,?)"
+                let ssql = 'update scores set scores.java=? ,scores.h5=? ,scores.mysql=?  where sid = ?'
+            let  addSqlParams =[java,h5,mysql,sid];
+            db.query (ssql,addSqlParams,function (result,fields) {
+                return res.json({
+                    status: 200,
+                    msg: '更改成功',
+                })
+            })
+        }
+    })
+})
 //---------------删除-----------------------------
 //删除学生信息
 app.post('/api/deletestu',(req,res)=>{
-    //1.创建数组保存 post传过来的数据
-    let arr = []
-    //2.数据接收..
-    req.on("data", (buffer) => {
-        console.log(buffer);
-        arr.push(buffer);
-    });
-    //3.接收结束，解析数据
-    req.on("end", () => {
-        let buffer = Buffer.concat(arr);
-        console.log('准备解析');
 
-        //解析
-        let ss = querystring.parse(buffer.toString());
-        console.log(ss);
-        let {sname} = ss
-        if (sname=='老萝卜'){
+        let {name} = req.body
+        if (name=='老萝卜'){
             return res.json({
                 status:-1,
                 msg:'该用户不能删除'
             })
         }else{
-            let sql = "SELECT * FROM student WHERE sname = ? "
-            db.query(sql, sname, (result) => {
+            let sql = "SELECT * FROM user WHERE name = ? "
+            db.query(sql, name, (result) => {
                 if (!result.length) {
                     return res.json({
                         status:-1,
                         msg:'用户名不存在'
                     })
                 }else {
-                    let sql2 = 'delete from  student  where sname= ?'
+                    let sql2 = 'delete from  user  where name= ?'
                     // let where_value = [params.username];
                     // console.log(sql)
                     // console.log(where_value)
-                    db.query(sql2 , sname ,  (result)=> {
+                    db.query(sql2 , name ,  (result)=> {
                         console.log(1)
                         console.log(result)
                         if (result.affectedRows>0) {
@@ -255,7 +296,6 @@ app.post('/api/deletestu',(req,res)=>{
             })
         }
 
-    })
 });
 //删除老师信息
 app.post('/api/deleteteach',(req,res)=>{
@@ -407,8 +447,6 @@ app.post('/api/deletecourse',(req,res)=>{
 // db.query(addSql,addSqlParams,function(result,fields){
 //     console.log('添加成功')
 // })
-
-
 //删
 // const  delSql = 'DELETE FROM t_class WHERE id=6 ';
 // const delParams = [id="6"]
@@ -416,7 +454,6 @@ app.post('/api/deletecourse',(req,res)=>{
 //     console.log("删除成功")
 //
 // })
-
 // 改
 //语句
 // const  UpSql = 'UPDATE t_student SET sage="18" WHERE sid=5 ';
@@ -424,8 +461,6 @@ app.post('/api/deletecourse',(req,res)=>{
 // db.query(UpSql,[],function(result,fields){
 //     console.log('更新成功成功')
 // })
-
-
 // app.delete()
 
 app.listen(8088,()=>{
