@@ -141,7 +141,7 @@ app.get('/api/teacher',(req,res)=>{
 app.get('/api/course',(req,res)=>{
     const query  = url.parse(req.url, true);
     console.log( query )
-    db.query('select * from course', [],function(result,fields){
+    db.query('select * from allcourse', [],function(result,fields){
         console.log('查询结果：');
         console.log(result);
         res.send({result,status:200})
@@ -181,7 +181,16 @@ app.get('/api/test',(req,res)=>{
 
 
 //成绩查询接口
-
+app.get('/api/score',(req,res)=>{
+    const query  = url.parse(req.url, true);
+    console.log( query )
+    const sql = "select user.username,user.name ,scores.sid ,scores.1,scores.2,scores.3  from scores inner join user on scores.sid = user.username "
+    db.query(sql, [],function(result,fields){
+        console.log('查询结果：');
+        console.log(result);
+        res.send({result,status:200})
+    })
+})
 //--------------------增加------------------------------
 
 
