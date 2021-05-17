@@ -185,6 +185,19 @@ app.get('/api/score',(req,res)=>{
         res.send({result,status:200})
     })
 })
+// //学生查询成绩接口
+// app.get('/api/scorestu',(req,res)=>{
+//     const query  = url.parse(req.url, true);
+//     console.log(query)
+//     const sql = "select from  scores  where sid = ?"
+//     params=query.query.username
+//     db.query(sql, params,function(result,fields){
+//         console.log('查询结果：');
+//         console.log(result);
+//         res.send({result,status:200})
+//     })
+// })
+
 //登陆个人信息
 app.get('/api/mine',(req,res)=>{
     const query  = url.parse(req.url, true);
@@ -255,6 +268,96 @@ app.post('/api/upscore',(req,res)=>{
         }
     })
 })
+// ----------------增加或者修改人员信息-------------
+app.post('/api/changeuser',(req,res)=>{
+    console.log(req.body)
+        let {
+            id,name,gender,age,op,classr
+        } = req.body
+        console.log(req.body)
+
+        let sql = "SELECT * FROM user WHERE username = ? "
+        db.query(sql, id, (result) => {
+            if (!result.length) {
+                let ssql = "INSERT INTO user ( username,name,gender,age,op,class) VALUES(?,?,?,?,?,?)"
+                let  addSqlParams =[id,name,gender,age,op,classr];
+                db.query (ssql,addSqlParams,function (result,fields) {
+                    return res.json({
+                        status: 200,
+                        msg: '添加成功',
+                    })
+                })
+            }else {
+               let sql = "update user set user.name=? ,user.gender=? ,user.age=?,user.op=?,user.class=? where username = ?"
+               db.query(sql,[name,gender,age,op,classr,id],function(result,fields){
+                   return  res.json({
+                    status: 200,
+                    msg: '修改成功',
+                   })
+               })
+            }
+
+
+        })
+
+
+
+
+
+    // })
+});
+// -----------------增加或者修改课程信息=--------
+app.post('/api/changecousre',(req,res)=>{
+    console.log(req.body)
+        let {
+           id,cname,tid,croom,
+        } = req.body
+        console.log(req.body)
+        ss="select*from user where username = ?"
+        db.query(ss,tid,result=>{
+            if(result.op!==1){
+                return res.json({
+                    status: -1,
+                    msg: '老师不存在',
+                })
+            }else{
+            
+                let sql = "SELECT * FROM allcourse WHERE cname = ? "
+                db.query(sql, cname, (result) => {
+                    if (!result.length) {
+                        let ssql = "INSERT INTO allcourse ( courseid,cname,tid,croom) VALUES(?,?,?,?)"
+                        let  addSqlParams =[id,cname,tid,croom];
+                        db.query (ssql,addSqlParams,function (result,fields) {
+                            return res.json({
+                                status: 200,
+                                msg: '添加成功',
+                            })
+                        })
+                    }else {
+                       let sql = "update allcourse set allcourse.courseid=?, allcourse.tid=? ,allcourse.croom=? where cname = ?"
+                       db.query(sql,[id,tid,croom,cname],function(result,fields){
+                           return  res.json({
+                            status: 200,
+                            msg: '修改成功',
+                           })
+                       })
+                    }
+        
+        
+                })
+    
+            }
+    
+        })
+
+     
+
+
+
+
+
+    // })
+});
 //---------------删除-----------------------------
 //删除学生信息
 app.post('/api/deletestu',(req,res)=>{
